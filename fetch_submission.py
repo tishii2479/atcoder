@@ -149,7 +149,7 @@ else:
     repo_url = "https://github.com/tishii2479/atcoder.git"
     repo = git.Repo()
     repo.git.add("submissions/*")
-    repo.git.commit("*", message="add submission: " + dt_now.strftime('%Y/%m/%d %H:%M:%S'))
+    repo.git.commit("submissions/*", message="add submission: " + dt_now.strftime('%Y/%m/%d %H:%M:%S'))
     repo.git.push("origin", "main")
 
     print(f"Finished process, added {add_cnt} files")
