@@ -61,13 +61,13 @@ newestSubmits =  collectNewestAcceptedSubmissions(submissions)
 newestSubmits["abc168"][0]
 
 
-# In[9]:
+# In[7]:
 
 
 import os
 
 
-# In[10]:
+# In[8]:
 
 
 root = "submissions/"
@@ -77,7 +77,7 @@ for contestName in newestSubmits:
     os.makedirs(path, exist_ok=True)
 
 
-# In[11]:
+# In[9]:
 
 
 import chromedriver_binary
@@ -86,6 +86,9 @@ from time import sleep
 import subprocess
 
 driver = webdriver.Chrome()
+
+# 追加したファイルの数を増やす
+add_cnt = 0
 
 for submissions in newestSubmits.values():
     for sub in submissions:
@@ -121,6 +124,9 @@ for submissions in newestSubmits.values():
         # C++の場合にはclang-formatを使ってフォーマットする
         if "C++" in sub["language"]:
             subprocess.call(["clang-format", "-i",  "-style=file", path])
+        
+        # 追加したファイルの数を増やす
+        add_cnt += 1
             
         # アクセス負荷軽減のために時間をおく(3秒)
         sleep(3)
@@ -128,17 +134,23 @@ for submissions in newestSubmits.values():
 driver.quit()
 
 
-# In[21]:
+# In[11]:
 
 
-# GitHubにプッシュ
-import git
-import datetime
+# 何も追加していなければGitにアクセスしない
+if add_cnt == 0:
+    print("No added submissions, end process")
+else:
+    # GitHubにプッシュ
+    import git
+    import datetime
 
-dt_now = datetime.datetime.now()
-repo_url = "https://github.com/tishii2479/atcoder.git"
-repo = git.Repo()
-repo.git.add("*")
-repo.git.commit("*", message="add submission: " + dt_now.strftime('%Y年%m月%d日 %H:%M:%S'))
-repo.git.push("origin", "main")
+    dt_now = datetime.datetime.now()
+    repo_url = "https://github.com/tishii2479/atcoder.git"
+    repo = git.Repo()
+    repo.git.add("*")
+    repo.git.commit("*", message="add submission: " + dt_now.strftime('%Y/%m/%d %H:%M:%S'))
+    repo.git.push("origin", "main")
+
+    print(f"Finished process, added {add_cnt} files")
 
