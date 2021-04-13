@@ -61,13 +61,13 @@ newestSubmits =  collectNewestAcceptedSubmissions(submissions)
 newestSubmits["abc168"][0]
 
 
-# In[7]:
+# In[9]:
 
 
 import os
 
 
-# In[17]:
+# In[10]:
 
 
 root = "submissions/"
@@ -77,7 +77,7 @@ for contestName in newestSubmits:
     os.makedirs(path, exist_ok=True)
 
 
-# In[18]:
+# In[11]:
 
 
 import chromedriver_binary
@@ -124,6 +124,21 @@ for submissions in newestSubmits.values():
             
         # アクセス負荷軽減のために時間をおく(3秒)
         sleep(3)
-
+        
 driver.quit()
+
+
+# In[21]:
+
+
+# GitHubにプッシュ
+import git
+import datetime
+
+dt_now = datetime.datetime.now()
+repo_url = "https://github.com/tishii2479/atcoder.git"
+repo = git.Repo()
+repo.git.add("*")
+repo.git.commit("*", message="add submission: " + dt_now.strftime('%Y年%m月%d日 %H:%M:%S'))
+repo.git.push("origin", "main")
 
