@@ -1,21 +1,21 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[3]:
 
 
 import requests
 import json
 
 
-# In[2]:
+# In[4]:
 
 
 userID = "tishii24"
 api_path = "https://kenkoooo.com/atcoder/atcoder-api/results?user="
 
 
-# In[3]:
+# In[5]:
 
 
 # APIを用いた提出データの取得
@@ -26,14 +26,14 @@ def getSubmissionData(userID):
     return jsonData
 
 
-# In[4]:
+# In[6]:
 
 
 submissions = getSubmissionData(userID)
 submissions[:2]
 
 
-# In[5]:
+# In[7]:
 
 
 # 各問題において最も新しいAC提出のみを取得する
@@ -54,20 +54,20 @@ def collectNewestAcceptedSubmissions(submissions):
     return result
 
 
-# In[6]:
+# In[8]:
 
 
 newestSubmits =  collectNewestAcceptedSubmissions(submissions)
 newestSubmits["abc168"][0]
 
 
-# In[7]:
+# In[9]:
 
 
 import os
 
 
-# In[8]:
+# In[10]:
 
 
 root = "submissions/"
@@ -77,13 +77,19 @@ for contestName in newestSubmits:
     os.makedirs(path, exist_ok=True)
 
 
-# In[9]:
+# In[11]:
 
 
+import re
+import html
 import chromedriver_binary
 from selenium import webdriver
 from time import sleep
 import subprocess
+
+
+# In[14]:
+
 
 driver = webdriver.Chrome()
 
@@ -116,10 +122,23 @@ for submissions in newestSubmits.values():
         
         # 提出コードの取得
         code = driver.find_element_by_id("submission-code") 
+        
+        # code.text は提出時に含めていない空白が期待に反して含まれてしまう
+        # 空白はシンタックスハイライティングによるものであるように見える
+        # innerHTML から不要なタグなどを消し、空白が意図通りのテキストを得る
+        inner_html = code.get_attribute('innerHTML')
+        list_items = re.findall(r'<li[^>]*>.*?</li>', inner_html)
+        lines = []
+        for li in list_items:
+            line1 = re.sub(r'<[^>]+>', '', li)
+            line2 = re.sub(r'&nbsp;', '', line1)
+            line3 = html.unescape(line2)
+            lines.append(line3 + "\n")
+        code_text = ''.join(lines)
             
         # 書き込み
         with open(path, 'w') as f:
-            f.write(code.text)
+            f.write(code_text)
         
         # C++の場合にはclang-formatを使ってフォーマットする
         if "C++" in sub["language"]:
@@ -134,7 +153,7 @@ for submissions in newestSubmits.values():
 driver.quit()
 
 
-# In[10]:
+# In[16]:
 
 
 if add_cnt == 0:
@@ -153,4 +172,10 @@ else:
     repo.git.push("origin", "main")
 
     print(f"Finished process, added {add_cnt} files")
+
+
+# In[ ]:
+
+
+
 
